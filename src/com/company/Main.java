@@ -13,6 +13,7 @@ public class Main {
         if(q < p) {
             q = p;
             p = q;
+
         }
         int res;
         if(p == 0) {
