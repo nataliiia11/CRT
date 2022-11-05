@@ -1,3 +1,15 @@
 # Created by .ignore support plugin (hsz.mobi)
-
-src/
+.gitignore
+.idea/.gitignore
+.idea/checkstyle-idea.xml
+.idea/code-comments.xml
+.idea/codeStyles/
+.idea/description.html
+.idea/encodings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/project-template.xml
+CRT_Java.iml
+out/
+test/
+.idea/vcs.xml
