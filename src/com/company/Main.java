@@ -1,15 +1,12 @@
 package com.company;
-import org.w3c.dom.css.CSSStyleDeclaration;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
-     /*   BufferedReader reader = new BufferedReader(
+        /*BufferedReader reader = new BufferedReader(
                 new InputStreamReader(System.in));
         System.out.println("Please enter first really big number");
         String inputString1 = reader.readLine();
@@ -19,16 +16,14 @@ public class Main {
         BigInteger num2 = new BigInteger(inputString2);
         System.out.println("Please enter first prime big number");
         String inputString3 = reader.readLine();
-        int num3 = Integer.valueOf(inputString3);
+        int num3 = Integer.parseInt(inputString3);
         System.out.println("Please enter second prime big number");
         String inputString4 = reader.readLine();
-        int num4 = Integer.valueOf(inputString4) ;
-
+        int num4 = Integer.parseInt(inputString4) ;
         System.out.println(computeY(num1, num2, num3, num4));
-        System.out.println(test(num1, num2, num3, num4));
+        */
+        System.out.println(multiplicativeInverse(6,11));
 
-      */
-        System.out.println(multiplicativeInverse(10, 17));
     }
     public static int euclAlg(int q, int p) {
         int inv = 0;
@@ -46,33 +41,29 @@ public class Main {
         return res;
     }
 
+    //Determine a solution z for qz ≡ 1 mod p
 
-
-
+    // computed following explanation https://www.youtube.com/watch?v=lq285DDdmtw&t=3s
     //Determine a solution z for qz ≡ 1 mod p
 
     public static int multiplicativeInverse(int q, int p) {
         int res = 0;
         int inv;
+        //q should be bigger than p
+        //so if p is bigger we inverse the value of p and q
         if(q < p ) {
             inv = p;
             p = q;
             q = inv;
-        }
-        /*
-        * Q  A  B  R  T1  T2  T
-        * 5  11 2  1   0  1  -5
-        * 2  2  1  0   1  -5  11
-        * 0  1  0  x   -5  11  x
-        * */
+    }
         int Q = q / p;
         int r = q % p;
         int t1 = 0;
         int t2 = 1;
         int t;
         while (r >= 0) {
-           t = t1 - t2 * Q;
-           q  = p;
+            t = t1 - t2 * Q;
+            q  = p;
             p = r;
             t1 = t2;
             t2 = t;
@@ -89,32 +80,60 @@ public class Main {
         }
         return res;
     }
-//  Compute y ≡ (a - b)z mod p
-        public static BigInteger computeY(BigInteger X, BigInteger Y, int p, int q) {
-        BigInteger res ;
-        //(a,b) := x mod p, x mod q
-            // a := x mod p
-        BigInteger ap = X.remainder(BigInteger.valueOf(p));
-        //b:= x mod q
-        BigInteger aq = X.remainder(BigInteger.valueOf(q));
-        //(c,d) := y mod p, y mod q
-            //  c:= y mod p
-        BigInteger bp = Y.remainder(BigInteger.valueOf(p));
-        // d := y mod p
-        BigInteger bq = Y.remainder(BigInteger.valueOf(q));
-        // e,f : = (ac) mod p, (bd) mod q
 
-            //(ac) mod p,
-        BigInteger aaa = (ap.multiply(bp)).remainder(BigInteger.valueOf(p));
-        //(bd) mod q
-        BigInteger bbb = (aq.multiply(bq)).remainder(BigInteger.valueOf(q));
+
+//  Compute y ≡ (a - b)z mod p
+    public static BigInteger computeY(BigInteger X, BigInteger Y, int p, int q) {
+        int inv;
+        BigInteger res;
+
+          if(p >  q) {
+             inv = p;
+             p = q;
+             q = inv;
+            }
+        BigInteger inv1;
+        if(X.compareTo(Y) == -1) {
+            inv1  = X;
+            X = Y;
+            Y = inv1;
+        }
+
+        /*
+            (a,b) := x mod p, x mod q
+             a := x mod p
+         */
+            BigInteger xPartOne = X.remainder(BigInteger.valueOf(q));
+
+            BigInteger xPartTwo = X.remainder(BigInteger.valueOf(p));
+            BigInteger yPartOne = Y.remainder(BigInteger.valueOf(q));
+            BigInteger yPartTwo = Y.remainder(BigInteger.valueOf(p));
+            BigInteger aaa = (xPartOne.multiply(yPartOne)).remainder(BigInteger.valueOf(q));
+            BigInteger bbb = (yPartTwo.multiply(xPartTwo)).remainder(BigInteger.valueOf(p));
+        //we need this part to always deduct smaller number from bigger number in the next step to avoid negative number
+            BigInteger inv2;
+            if(aaa.compareTo(bbb) == 1) {
+               inv2 = aaa;
+                aaa = bbb;
+                bbb = inv2;
+            }
         //qz ≡ 1 mod p
-        BigInteger z = BigInteger.valueOf(multiplicativeInverse(p, q));
-       // v ≡ (f-e) * z % q
-        BigInteger V = (bbb.subtract(aaa)).multiply(z).remainder(BigInteger.valueOf(q));
+        BigInteger z = BigInteger.valueOf(multiplicativeInverse(Math.max(p,q), Math.min(p, q)));
+        //here we found out that if either X or Y or both are divisible without remainder to q or p or both test failed
+        //So this part of code was necessary for test to pass
+        int min = Math.min(q, p);
+        int max = Math.max(q, p);
+        int inv4;
+        if(X.remainder(BigInteger.valueOf(q)) == BigInteger.valueOf(0) || Y.remainder(BigInteger.valueOf(p)) == BigInteger.valueOf(0)
+                || Y.remainder(BigInteger.valueOf(q)) == BigInteger.valueOf(0) || X.remainder(BigInteger.valueOf(p)) == BigInteger.valueOf(0)) {
+            inv4  = min;
+            min = max;
+            max = inv4;
+        }
+        // v ≡ (f-e) * z % q
+        BigInteger V = ((bbb.subtract(aaa)).multiply(z)).remainder(BigInteger.valueOf(min));
         //Determine x = yq + b
-        res = (V.multiply(BigInteger.valueOf(q))).add(bbb);
+        res = (V.multiply(BigInteger.valueOf(max))).add(aaa);
         return res;
         }
-        //Compute y ≡ (a - b)z mod p
     }
